@@ -1,5 +1,5 @@
 from pydantic import BaseModel, HttpUrl
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 class AnswerRequest(BaseModel):
     message: str
@@ -15,7 +15,13 @@ class Source(BaseModel):
     title: str
     link: HttpUrl
 
+class FunctionCallOutput(BaseModel):
+    function_name: str
+    arguments: dict
+    response: str
+    
 class AnswerResponse(BaseModel):
     answer: str
     sources: Optional[List[Source]] = None
     follow_up_questions: Optional[List[str]] = None
+    tool_outputs: Optional[List[Dict[str, Any]]] = None   # 🎯 Fix here
