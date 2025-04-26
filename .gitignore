@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+*.eggs/
+*.log
+
+# Environment
+.env
+.env.*
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Redis dump files
+dump.rdb
+
+# FAISS Indexes (Optional)
+*.faiss
+
+# Docker
+docker-compose.override.yml
+
+# Coverage / Test files
+htmlcov/
+coverage.xml
+.pytest_cache/
+.tox/
+.nox/
+.cache/
+
+# Build
+build/
+dist/
+*.egg
+MANIFEST
+
+# Misc
+*.bak
+*.tmp
