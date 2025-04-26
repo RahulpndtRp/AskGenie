@@ -83,8 +83,8 @@ app/
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/your-username/llm-answer-engine.git
-cd llm-answer-engine
+git https://github.com/RahulpndtRp/AskGenie.git
+cd AskGenie
 
 # 2. Create virtual environment
 python3 -m venv venv
