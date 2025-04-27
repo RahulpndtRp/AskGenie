@@ -1,4 +1,4 @@
-# LLM Answer Engine (Python Version)
+# AskGenie (Python Version)
 
 A modular, scalable LLM-based answer generation engine that:
 - Rephrases search queries intelligently
