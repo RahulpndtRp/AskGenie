@@ -1,4 +1,3 @@
-
 # LLM Answer Engine (Python Version)
 
 A modular, scalable LLM-based answer generation engine that:
@@ -83,7 +82,7 @@ app/
 
 ```bash
 # 1. Clone the repo
-git https://github.com/RahulpndtRp/AskGenie.git
+git clone https://github.com/RahulpndtRp/AskGenie.git
 cd AskGenie
 
 # 2. Create virtual environment
@@ -114,7 +113,28 @@ docker run -d -p 6379:6379 redis
 uvicorn app.main:app --reload
 ```
 
-Swagger Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+Swagger Docs available at:  
+[http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
+## 🖥️ Chat UI (Built-in)
+
+A lightweight, production-grade Chat UI is also included!
+
+- No frontend build step required
+- Fully embedded using Jinja2 templates
+- Supports preloaded questions, dark mode, function calling results, sources, and settings panel
+- Directly integrated into FastAPI
+
+### Access the Chat UI here:
+
+```bash
+http://localhost:8000/
+```
+
+✅ Start chatting instantly after running your FastAPI server!  
+✅ You can adjust API call parameters (e.g., chunk size, sources) from the side panel settings.
 
 ---
 
@@ -206,7 +226,8 @@ embed_sources_in_llm_response=true
 - File upload-based RAG (document search)
 - Ollama local model compatibility
 - Fine-grained semantic caching
-- Frontend integration (Streamlit / Chainlit)
+- More flexible Frontend options (Chainlit)
+- Memeory based Chat Profile
 
 ---
 
@@ -219,3 +240,5 @@ MIT License.
 ## 🤝 Credits
 
 Built with ❤️ by Rahul Pandey.
+
+---

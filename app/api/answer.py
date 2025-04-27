@@ -4,7 +4,7 @@ from app.services.answer_service import generate_answer
 
 router = APIRouter()
 
-@router.post("/answer", response_model=AnswerResponse)
+@router.post("/answer", response_model=AnswerResponse, name="answer")
 async def answer(endpoint_request: AnswerRequest, request: Request):
     """
     Answer endpoint router (thin).

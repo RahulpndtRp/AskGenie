@@ -13,3 +13,5 @@ pytest
 pytest-asyncio
 langchain-community
 tiktoken
+faiss-cpu
+jinja2

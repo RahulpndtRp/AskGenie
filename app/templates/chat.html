@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Backdrop for Blur -->
+<div id="backdrop" class="backdrop hidden"></div>
+
+<!-- Toolbox Panel (Settings Side Panel) -->
+<div id="toolbox-panel" class="toolbox-panel">
+  <div class="toolbox-header">
+    <h3>Settings</h3>
+    <button id="close-toolbox" class="close-btn">✖️</button>
+  </div>
+
+  <div class="toolbox-body">
+    <div class="setting">
+      <label>Return Sources:</label>
+      <input type="checkbox" id="return_sources" checked />
+    </div>
+    <div class="setting">
+      <label>Return Follow-Up Questions:</label>
+      <input type="checkbox" id="return_follow_ups" checked />
+    </div>
+    <div class="setting">
+      <label>Embed Sources in LLM Response:</label>
+      <input type="checkbox" id="embed_sources" />
+    </div>
+    <div class="setting">
+      <label>Text Chunk Size:</label>
+      <input type="number" id="text_chunk_size" value="1000" />
+    </div>
+    <div class="setting">
+      <label>Text Chunk Overlap:</label>
+      <input type="number" id="text_chunk_overlap" value="200" />
+    </div>
+    <div class="setting">
+      <label>Number of Similarity Results:</label>
+      <input type="number" id="number_of_similarity_results" value="2" />
+    </div>
+    <div class="setting">
+      <label>Number of Pages to Scan:</label>
+      <input type="number" id="number_of_pages_to_scan" value="4" />
+    </div>
+
+    <div class="toolbox-actions">
+      <button id="save-settings" class="action-btn save-btn">Save Settings</button>
+      <button id="reset-settings" class="action-btn reset-btn">Reset Defaults</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Chat Area -->
+<div id="main-content">
+  <div class="container">
+
+    <!-- Header Section -->
+    <div class="header">
+      <button id="settings-btn" class="header-btn">⚙️</button>
+      <h1 class="title">Intelligent Advisor</h1>
+      <button id="darkmode-toggle" class="darkmode-toggle">🌙</button>
+    </div>
+
+    <!-- Preloaded Suggested Questions -->
+    <div id="preloaded-questions" class="preloaded-questions"></div>
+
+    <!-- Chat Window -->
+    <div id="chat-window" class="chat-window"></div>
+
+    <!-- Tool Cards -->
+    <div id="tool-cards" class="tool-cards"></div>
+
+    <!-- Sources Area -->
+    <div id="sources" class="sources"></div>
+
+    <!-- Raw JSON Tool Outputs -->
+    <details id="tools-box" hidden>
+      <summary>Tool Details (JSON)</summary>
+      <pre id="tools-json"></pre>
+    </details>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <input id="chat-input" type="text" placeholder="Type your message…" autocomplete="off" />
+      <button id="send-btn">Send</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Inject Backend Endpoint URL -->
+<script>
+  window.CHAT_ENDPOINT = "{{ url_for('answer') }}";
+</script>
+
+{% endblock %}
