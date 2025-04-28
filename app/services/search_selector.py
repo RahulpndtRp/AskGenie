@@ -13,16 +13,15 @@ async def search_selector(query: str, count: int = 4):
             logger.info(f"[Search Selector] Using Serper search first for query: {query}")
             results = await serper_search(query, count)
             if not results:
-                logger.warning(f"[Search Selector] Serper returned no results, trying Brave...")
-                results = await brave_search(query, count)
+                logger.warning(f"[Search Selector] Serper returned no results")
+                # results = await brave_search(query, count)
 
         elif provider == "brave":
             logger.info(f"[Search Selector] Using Brave search first for query: {query}")
             results = await brave_search(query, count)
             if not results:
-                logger.warning(f"[Search Selector] Brave returned no results, trying Serper...")
-                results = await serper_search(query, count)
-
+                logger.warning(f"[Search Selector] Brave returned no results")
+                # results = await serper_search(query, count)
         else:
             logger.error(f"[Search Selector] Invalid search engine provider: {provider}")
             return []

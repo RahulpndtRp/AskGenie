@@ -2,7 +2,7 @@ from fastapi import Request
 from app.models.schemas import AnswerRequest, AnswerResponse, Source
 from app.services.search_selector import search_selector
 from app.services.scraper import scrape_documents
-from app.services.rag import chunk_and_embed, similarity_search
+from app.services.rag import embedding_service
 from app.services.llm import llm_service # generate_answer_text, generate_followup_questions, rephrase_input
 from app.cache import get_cached_answer, set_cached_answer
 from app.services.utils import rate_limit_check
@@ -39,8 +39,8 @@ async def generate_answer(endpoint_request: AnswerRequest, request: Request) -> 
             return AnswerResponse(answer="No relevant sources found.")
 
         # Chunk and Embed
-        store = chunk_and_embed(scraped_texts, metadatas)
-        related_docs = similarity_search(store, rephrased, k=endpoint_request.number_of_similarity_results)
+        store = embedding_service.chunk_and_embed(scraped_texts, metadatas)
+        related_docs = embedding_service.similarity_search(store, rephrased, k=endpoint_request.number_of_similarity_results)
 
         context = "\n\n".join([doc["text"] for doc in related_docs])
         sources = [Source(title=doc.get("title", ""), link=doc.get("link", "")) for doc in related_docs if "link" in doc]

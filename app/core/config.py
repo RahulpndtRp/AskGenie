@@ -18,8 +18,10 @@ class Settings(BaseSettings):
     # --- API Keys ---
     openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
     groq_api_key: str = Field(default="", env="GROQ_API_KEY")
+    mistral_api_key: str = Field(default="", env="MISTRAL_API_KEY")
     serper_api_key: str = Field(default="", env="SERPER_API_KEY")
     brave_search_api_key: str = Field(default="", env="BRAVE_SEARCH_API_KEY")
+    
 
     # --- Ollama Settings ---
     ollama_base_url: HttpUrl = Field(default="http://localhost:11434", env="OLLAMA_BASE_URL")
