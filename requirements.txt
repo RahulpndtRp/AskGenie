@@ -16,3 +16,4 @@ tiktoken
 faiss-cpu
 jinja2
 langchain_mistralai
+langchain_cohere
