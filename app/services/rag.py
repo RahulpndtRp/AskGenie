@@ -4,6 +4,7 @@ from typing import List, Dict
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings, HuggingFaceEmbeddings
 from langchain_mistralai import MistralAIEmbeddings
+from langchain_cohere import CohereEmbeddings
 from langchain_community.vectorstores import FAISS
 from app.core.config import settings
 from app.core.logger import logger
@@ -43,6 +44,12 @@ class EmbeddingService:
             return HuggingFaceEmbeddings(
                 model_name=settings.embedding_model
             )
+        elif provider == "cohere":
+            logger.info("[Embedder] Using Cohere Embeddings.")
+            return CohereEmbeddings(
+            model=settings.embedding_model,  # Example: "embed-english-v3"
+            cohere_api_key=settings.cohere_api_key
+        )
         else:
             logger.error(f"[Embedder] Unknown embedding provider: {provider}")
             raise ValueError(f"Unsupported embedding provider: {provider}")

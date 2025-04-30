@@ -47,6 +47,7 @@ coverage.xml
 .tox/
 .nox/
 .cache/
+z_test
 
 # Build
 build/

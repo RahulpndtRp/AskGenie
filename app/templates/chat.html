@@ -25,6 +25,10 @@
       <input type="checkbox" id="embed_sources" />
     </div>
     <div class="setting">
+      <label>Enable Streaming:</label>
+      <input type="checkbox" id="stream_mode" checked />
+    </div>    
+    <div class="setting">
       <label>Text Chunk Size:</label>
       <input type="number" id="text_chunk_size" value="1000" />
     </div>
@@ -62,27 +66,29 @@
     <!-- Preloaded Suggested Questions -->
     <div id="preloaded-questions" class="preloaded-questions"></div>
 
-    <!-- Chat Window -->
-    <div id="chat-window" class="chat-window"></div>
+    <!-- Backend Activity Log -->
+  <div id="activity-log" class="activity-log hidden"></div>
 
-    <!-- Tool Cards -->
-    <div id="tool-cards" class="tool-cards"></div>
+    <!-- Scrollable Chat Messages Only -->
+    <div class="chat-scroll-area" id="chat-scroll-area">
+      <div id="chat-window" class="chat-window"></div>
+    </div>
 
-    <!-- Sources Area -->
-    <div id="sources" class="sources"></div>
-
-    <!-- Raw JSON Tool Outputs -->
-    <details id="tools-box" hidden>
-      <summary>Tool Details (JSON)</summary>
-      <pre id="tools-json"></pre>
-    </details>
+    <!-- Tool Cards, Sources, and JSON Output -->
+    <div id="chat-meta">
+      <div id="tool-cards" class="tool-cards"></div>
+      <div id="sources" class="sources"></div>
+      <details id="tools-box" hidden>
+        <summary>Tool Details (JSON)</summary>
+        <pre id="tools-json"></pre>
+      </details>
+    </div>
 
     <!-- Input Area -->
     <div class="input-area">
       <input id="chat-input" type="text" placeholder="Type your message…" autocomplete="off" />
       <button id="send-btn">Send</button>
     </div>
-
   </div>
 </div>
 
@@ -90,5 +96,4 @@
 <script>
   window.CHAT_ENDPOINT = "{{ url_for('answer') }}";
 </script>
-
 {% endblock %}

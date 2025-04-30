@@ -15,9 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeToolboxBtn = document.getElementById("close-toolbox");
   const mainContent = document.getElementById("main-content");
 
-  const markdown = window.marked; // Assuming marked.js is loaded
+  const markdown = window.marked;
 
-  // 🛠 Settings Panel open/close
   settingsBtn.onclick = () => {
     toolboxPanel.classList.add("open");
     backdrop.classList.remove("hidden");
@@ -36,7 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
     mainContent.classList.remove("blur");
   };
 
-  // 🛠 Toast notification
   function showToast(message) {
     let toast = document.getElementById("toast");
     if (!toast) {
@@ -52,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 2500);
   }
 
-  // 🛠 Save and Load Settings
   function saveSettings() {
     const settings = {
       return_sources: document.getElementById("return_sources").checked,
@@ -62,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
       text_chunk_overlap: document.getElementById("text_chunk_overlap").value,
       number_of_similarity_results: document.getElementById("number_of_similarity_results").value,
       number_of_pages_to_scan: document.getElementById("number_of_pages_to_scan").value,
+      stream_mode: document.getElementById("stream_mode").checked,
     };
     localStorage.setItem("chat_settings", JSON.stringify(settings));
     showToast("Settings saved ✅");
@@ -77,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("text_chunk_overlap").value = saved.text_chunk_overlap;
       document.getElementById("number_of_similarity_results").value = saved.number_of_similarity_results;
       document.getElementById("number_of_pages_to_scan").value = saved.number_of_pages_to_scan;
+      document.getElementById("stream_mode").checked = saved.stream_mode;
     }
   }
 
@@ -88,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("text_chunk_overlap").value = 200;
     document.getElementById("number_of_similarity_results").value = 2;
     document.getElementById("number_of_pages_to_scan").value = 4;
+    document.getElementById("stream_mode").checked = true;
     localStorage.removeItem("chat_settings");
     showToast("Settings reset 🔄");
   }
@@ -97,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadSettings();
 
-  // 🛠 Preloaded Suggested Questions
   const PRELOADED = [
     "Where is Disneyland located and what is the latest news about it?",
     "Where is Apple headquarters?",
@@ -122,50 +121,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadPreloaded();
 
-  // 🛠 Escape HTML for safe text rendering
   function escapeHTML(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
-  // 🛠 Append Message
   function appendMessage(text, role, isHTML = false) {
     const div = document.createElement("div");
     div.className = `message ${role}`;
-
     const now = new Date();
     const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
     div.innerHTML = `
       <div>${isHTML ? text : escapeHTML(text)}</div>
       <div class="timestamp">${time}</div>
     `;
-
     chatWindow.appendChild(div);
     scrollChatToBottom();
   }
 
-  // 🛠 Send Message
+  function showActivity(msg) {
+    const el = document.getElementById("activity-log");
+    el.classList.remove("hidden");
+    el.textContent = msg;
+  }
+  
+
   async function sendMessage(text) {
     appendMessage(text, "user");
-
+  
     chatInput.value = "";
     chatInput.disabled = sendBtn.disabled = true;
-
-    // Clear old sources/tools
+  
     sourcesDiv.innerHTML = "";
     toolCardsDiv.innerHTML = "";
     toolsJson.textContent = "";
     toolsBox.hidden = true;
-
-    // Loading spinner while waiting
-    const loadingDiv = document.createElement("div");
-    loadingDiv.className = "message bot";
-    loadingDiv.innerHTML = '<div class="loader"></div>';
-    chatWindow.appendChild(loadingDiv);
+    document.getElementById("activity-log").classList.add("hidden");
+  
+    // Create bot message shell
+    const botDiv = document.createElement("div");
+    botDiv.className = "message bot";
+    const inner = document.createElement("div");
+    botDiv.appendChild(inner);
+    chatWindow.appendChild(botDiv);
     scrollChatToBottom();
-
+  
     const payload = {
       message: text,
       return_sources: document.getElementById("return_sources").checked,
@@ -175,28 +176,72 @@ document.addEventListener("DOMContentLoaded", () => {
       text_chunk_overlap: parseInt(document.getElementById("text_chunk_overlap").value),
       number_of_similarity_results: parseInt(document.getElementById("number_of_similarity_results").value),
       number_of_pages_to_scan: parseInt(document.getElementById("number_of_pages_to_scan").value),
+      stream: true
     };
-
-    const res = await fetch(window.CHAT_ENDPOINT, {
+  
+    const response = await fetch(window.CHAT_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-
-    const data = await res.json();
-    loadingDiv.remove();
-
-    appendMessage(markdown.parse(data.answer || ""), "bot", true);
-    renderSources(data.sources);
-    renderToolCards(data.tool_outputs);
-    renderToolsRaw(data.tool_outputs);
-    renderFollowUps(data.follow_up_questions);
-
+  
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+  
+    let fullAnswer = "";
+    let buffer = "";
+    let toolOutput = null;
+  
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+  
+      const chunk = decoder.decode(value, { stream: true });
+      buffer += chunk;
+  
+      while (buffer.includes("###")) {
+        const markerIndex = buffer.indexOf("###");
+        const nextNewline = buffer.indexOf("\n", markerIndex);
+        const line = buffer.slice(markerIndex, nextNewline).trim();
+  
+        if (line.startsWith("###ACTIVITY###")) {
+          const msg = line.replace("###ACTIVITY###", "").trim();
+          showActivity(msg);
+          buffer = buffer.slice(nextNewline + 1);
+        } else if (line.startsWith("###TOOL_OUTPUT###")) {
+          try {
+            const json = buffer.slice(nextNewline).replace("###TOOL_OUTPUT###", "").trim();
+            toolOutput = JSON.parse(json);
+          } catch (e) {
+            console.error("Failed to parse tool output");
+          }
+          buffer = ""; // Done processing
+          break;
+        } else {
+          break;
+        }
+      }
+  
+      const cleanChunk = chunk
+        .replace(/###ACTIVITY###.*/g, "")
+        .replace(/###TOOL_OUTPUT###.*/g, "");
+  
+      fullAnswer += cleanChunk;
+      inner.innerHTML = markdown.parse(fullAnswer);
+      scrollChatToBottom();
+    }
+  
+    // Final tool rendering
+    if (toolOutput) {
+      renderToolCards(toolOutput);
+      renderToolsRaw(toolOutput);
+    }
+  
+    // Load sources and follow-ups after full stream ends
     chatInput.disabled = sendBtn.disabled = false;
     chatInput.focus();
   }
 
-  // 🛠 Scroll Chat to Bottom
   function scrollChatToBottom() {
     setTimeout(() => {
       chatWindow.scrollTo({
@@ -206,14 +251,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 100);
   }
 
-  // 🛠 Render Sources
   function renderSources(sources) {
     sourcesDiv.innerHTML = "";
     if (!sources?.length) return;
 
     const container = document.createElement("div");
     container.className = "sources-container";
-
     const heading = document.createElement("div");
     heading.className = "sources-heading";
     heading.textContent = "Sources:";
@@ -232,14 +275,12 @@ document.addEventListener("DOMContentLoaded", () => {
     sourcesDiv.appendChild(container);
   }
 
-  // 🛠 Render Tool Cards
   function renderToolCards(tools) {
     toolCardsDiv.innerHTML = "";
     if (!tools?.length) return;
 
     tools.forEach(tool => {
       const card = document.createElement("div");
-
       const typeClass = {
         search_location: "map",
         search_shopping: "shopping",
@@ -287,7 +328,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🛠 Render Follow Up Questions
   function renderFollowUps(followUps) {
     preloadDiv.innerHTML = "";
     if (!followUps?.length) return;
@@ -303,7 +343,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 🛠 Render Raw Tools JSON
   function renderToolsRaw(tools) {
     if (tools?.length) {
       toolsJson.textContent = JSON.stringify(tools, null, 2);
@@ -313,7 +352,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 🛠 Wire input events
   sendBtn.onclick = () => {
     if (chatInput.value.trim()) sendMessage(chatInput.value.trim());
   };
@@ -324,5 +362,4 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("darkmode-toggle").onclick = () => {
     document.body.classList.toggle("dark");
   };
-
 });

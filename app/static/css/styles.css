@@ -420,3 +420,207 @@ body, html {
     text-align: right;
   }
   
+
+
+
+  .container {
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  
+  .chat-window {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .tool-cards,
+  .sources,
+  #tools-box {
+    padding: 12px 16px;
+    flex-shrink: 0;
+    background: #f9f9f9;
+  }
+  
+  .input-area {
+    flex-shrink: 0;
+    display: flex;
+    padding: 12px;
+    border-top: 1px solid #ccc;
+    background: #fff;
+  }
+
+  /* Make tool cards tighter */
+.tool-card {
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: #f5f7fa;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Specific card types */
+.tool-card.map {
+  background: #e6f2ff;
+}
+
+.tool-card.news {
+  background: #f4eaff;
+}
+
+.tool-card.shopping {
+  background: #fff3e0;
+}
+
+/* Title section smaller */
+.tool-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Reduce spacing for news article links */
+.news-block li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+/* Shrink source container */
+.sources-container {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  margin: 8px 0;
+}
+
+.sources-heading {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+/* Smaller text in sources */
+.sources-list li {
+  margin-bottom: 4px;
+}
+
+/* Responsive compactness for tool-cards */
+@media screen and (max-width: 768px) {
+  .tool-card {
+    font-size: 0.85rem;
+    padding: 10px;
+  }
+  .sources-container {
+    padding: 8px 10px;
+  }
+}
+
+
+.chat-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px;
+  scroll-behavior: smooth;
+}
+
+.chat-window {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+}
+
+#chat-meta {
+  padding: 0 16px;
+  overflow: visible;
+  background: #f9f9f9;
+  border-top: 1px solid #eee;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tool-cards,
+.sources,
+#tools-box {
+  margin-top: 12px;
+}
+
+
+
+
+.preloaded-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  justify-content: center;
+}
+
+.preloaded-btn {
+  font-size: 0.75rem; /* smaller text */
+  padding: 4px 10px;  /* smaller padding */
+  border-radius: 16px;
+  background: #e0f7fa;
+  border: 1px solid #077B94;
+  color: #077B94;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+@media (max-width: 480px) {
+  .preloaded-btn {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+}
+
+
+
+
+/* Backend Activity Log (compact) */
+.activity-log {
+  font-size: 0.85rem;
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 8px 12px;
+  margin: 10px 16px;
+  border-radius: 8px;
+  max-height: 70px;
+  overflow-y: auto;
+  line-height: 1.4;
+  transition: opacity 0.3s ease;
+}
+
+.activity-log.hidden {
+  display: none;
+}
+
+body.dark .activity-log {
+  background: #3e3b1f;
+  color: #ffe68d;
+  border-color: #665c2e;
+}
