@@ -167,6 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
     chatWindow.appendChild(botDiv);
     scrollChatToBottom();
   
+    const streamEnabled = document.getElementById("stream_mode").checked;
+  
     const payload = {
       message: text,
       return_sources: document.getElementById("return_sources").checked,
@@ -176,71 +178,89 @@ document.addEventListener("DOMContentLoaded", () => {
       text_chunk_overlap: parseInt(document.getElementById("text_chunk_overlap").value),
       number_of_similarity_results: parseInt(document.getElementById("number_of_similarity_results").value),
       number_of_pages_to_scan: parseInt(document.getElementById("number_of_pages_to_scan").value),
-      stream: true
+      stream: streamEnabled
     };
   
-    const response = await fetch(window.CHAT_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    if (streamEnabled) {
+      const response = await fetch(window.CHAT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
   
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
   
-    let fullAnswer = "";
-    let buffer = "";
-    let toolOutput = null;
+      let fullAnswer = "";
+      let buffer = "";
+      let toolOutput = null;
   
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
   
-      const chunk = decoder.decode(value, { stream: true });
-      buffer += chunk;
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
   
-      while (buffer.includes("###")) {
-        const markerIndex = buffer.indexOf("###");
-        const nextNewline = buffer.indexOf("\n", markerIndex);
-        const line = buffer.slice(markerIndex, nextNewline).trim();
+        while (buffer.includes("###")) {
+          const markerIndex = buffer.indexOf("###");
+          const nextNewline = buffer.indexOf("\n", markerIndex);
+          const line = buffer.slice(markerIndex, nextNewline).trim();
   
-        if (line.startsWith("###ACTIVITY###")) {
-          const msg = line.replace("###ACTIVITY###", "").trim();
-          showActivity(msg);
-          buffer = buffer.slice(nextNewline + 1);
-        } else if (line.startsWith("###TOOL_OUTPUT###")) {
-          try {
-            const json = buffer.slice(nextNewline).replace("###TOOL_OUTPUT###", "").trim();
-            toolOutput = JSON.parse(json);
-          } catch (e) {
-            console.error("Failed to parse tool output");
+          if (line.startsWith("###ACTIVITY###")) {
+            const msg = line.replace("###ACTIVITY###", "").trim();
+            showActivity(msg);
+            buffer = buffer.slice(nextNewline + 1);
+          } else if (line.startsWith("###TOOL_OUTPUT###")) {
+            try {
+              const json = buffer.slice(nextNewline).replace("###TOOL_OUTPUT###", "").trim();
+              toolOutput = JSON.parse(json);
+            } catch (e) {
+              console.error("Failed to parse tool output");
+            }
+            buffer = ""; // Done processing
+            break;
+          } else {
+            break;
           }
-          buffer = ""; // Done processing
-          break;
-        } else {
-          break;
         }
+  
+        const cleanChunk = chunk
+          .replace(/###ACTIVITY###.*/g, "")
+          .replace(/###TOOL_OUTPUT###.*/g, "");
+  
+        fullAnswer += cleanChunk;
+        inner.innerHTML = markdown.parse(fullAnswer);
+        scrollChatToBottom();
       }
   
-      const cleanChunk = chunk
-        .replace(/###ACTIVITY###.*/g, "")
-        .replace(/###TOOL_OUTPUT###.*/g, "");
+      // Final tool rendering
+      if (toolOutput) {
+        renderToolCards(toolOutput);
+        renderToolsRaw(toolOutput);
+      }
   
-      fullAnswer += cleanChunk;
-      inner.innerHTML = markdown.parse(fullAnswer);
-      scrollChatToBottom();
+    } else {
+      // NON-streaming mode
+      const res = await fetch(window.CHAT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+  
+      const data = await res.json();
+  
+      inner.innerHTML = markdown.parse(data.answer || "");
+      renderSources(data.sources);
+      renderToolCards(data.tool_outputs);
+      renderToolsRaw(data.tool_outputs);
+      renderFollowUps(data.follow_up_questions);
     }
   
-    // Final tool rendering
-    if (toolOutput) {
-      renderToolCards(toolOutput);
-      renderToolsRaw(toolOutput);
-    }
-  
-    // Load sources and follow-ups after full stream ends
     chatInput.disabled = sendBtn.disabled = false;
     chatInput.focus();
   }
+  
 
   function scrollChatToBottom() {
     setTimeout(() => {
