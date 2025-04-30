@@ -38,6 +38,8 @@ class Settings(BaseSettings):
     cohere_api_key: str = Field(default="", env="COHERE_API_KEY")
     serper_api_key: str = Field(default="", env="SERPER_API_KEY")
     brave_search_api_key: str = Field(default="", env="BRAVE_SEARCH_API_KEY")
+
+    search_provider: str = Field(default="", env="SEARCH_PROVIDER")
     
 
 
